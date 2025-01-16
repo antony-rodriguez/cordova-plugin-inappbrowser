@@ -825,21 +825,69 @@ BOOL isExiting = FALSE;
     self.addressLabel.textColor = [UIColor colorWithWhite:1.000 alpha:1.000];
     self.addressLabel.userInteractionEnabled = NO;
     
-    NSString* frontArrowString = NSLocalizedString(@">", nil); // create arrow from Unicode char
-    self.forwardButton = [[UIBarButtonItem alloc] initWithTitle:frontArrowString style:UIBarButtonItemStylePlain target:self action:@selector(goForward:)];
-    self.forwardButton.enabled = YES;
-    self.forwardButton.imageInsets = UIEdgeInsetsZero;
-    if (_browserOptions.navigationbuttoncolor != nil) { // Set button color if user sets it in options
-      self.forwardButton.tintColor = [self colorFromHexString:_browserOptions.navigationbuttoncolor];
+    // Botón de avanzar personalizado
+    NSString *frontArrowString = NSLocalizedString(@">", nil); // Crear texto
+    UIButton *forwardButtonCustomView = [UIButton buttonWithType:UIButtonTypeCustom];
+    [forwardButtonCustomView setTitle:frontArrowString forState:UIControlStateNormal];
+
+    // Cambiar el tamaño de la fuente
+    forwardButtonCustomView.titleLabel.font = [UIFont boldSystemFontOfSize:24.0]; // Cambia el tamaño según sea necesario
+
+    // Configurar el color del texto
+    if (_browserOptions.navigationbuttoncolor != nil) {
+        [forwardButtonCustomView setTitleColor:[self colorFromHexString:_browserOptions.navigationbuttoncolor] forState:UIControlStateNormal];
+    } else {
+        [forwardButtonCustomView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     }
 
-    NSString* backArrowString = NSLocalizedString(@"<", nil); // create arrow from Unicode char
-    self.backButton = [[UIBarButtonItem alloc] initWithTitle:backArrowString style:UIBarButtonItemStylePlain target:self action:@selector(goBack:)];
-    self.backButton.enabled = YES;
-    self.backButton.imageInsets = UIEdgeInsetsZero;
-    if (_browserOptions.navigationbuttoncolor != nil) { // Set button color if user sets it in options
-      self.backButton.tintColor = [self colorFromHexString:_browserOptions.navigationbuttoncolor];
+    // Configurar la acción del botón
+    [forwardButtonCustomView addTarget:self action:@selector(goForward:) forControlEvents:UIControlEventTouchUpInside];
+
+    // Ajustar el tamaño del botón
+    forwardButtonCustomView.frame = CGRectMake(0, 0, 40, 30); // Ajusta el tamaño según sea necesario
+
+    // Crear el UIBarButtonItem con el UIButton personalizado
+    self.forwardButton = [[UIBarButtonItem alloc] initWithCustomView:forwardButtonCustomView];
+    self.forwardButton.enabled = YES;
+
+    // Botón de retroceder personalizado
+    NSString *backArrowString = NSLocalizedString(@"<", nil); // Crear texto
+    UIButton *backButtonCustomView = [UIButton buttonWithType:UIButtonTypeCustom];
+    [backButtonCustomView setTitle:backArrowString forState:UIControlStateNormal];
+
+    // Cambiar el tamaño de la fuente
+    backButtonCustomView.titleLabel.font = [UIFont boldSystemFontOfSize:24.0]; // Cambia el tamaño según sea necesario
+
+    // Configurar el color del texto
+    if (_browserOptions.navigationbuttoncolor != nil) {
+        [backButtonCustomView setTitleColor:[self colorFromHexString:_browserOptions.navigationbuttoncolor] forState:UIControlStateNormal];
+    } else {
+        [backButtonCustomView setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     }
+
+    // Configurar la acción del botón
+    [backButtonCustomView addTarget:self action:@selector(goBack:) forControlEvents:UIControlEventTouchUpInside];
+
+    // Ajustar el tamaño del botón
+    backButtonCustomView.frame = CGRectMake(0, 0, 40, 30); // Ajusta el tamaño según sea necesario
+
+    // Crear el UIBarButtonItem con el UIButton personalizado
+    self.backButton = [[UIBarButtonItem alloc] initWithCustomView:backButtonCustomView];
+    self.backButton.enabled = YES;
+  
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.text = @"Salud"; // Cambia el título según lo desees
+    titleLabel.font = [UIFont boldSystemFontOfSize:28.0];
+    titleLabel.textColor = [self colorFromHexString:_browserOptions.closebuttoncolor];
+    titleLabel.textAlignment = NSTextAlignmentLeft;
+    titleLabel.frame = CGRectMake(0, 0, 150, TOOLBAR_HEIGHT); // Ajusta el tamaño según sea necesario
+    UIBarButtonItem *titleItem = [[UIBarButtonItem alloc] initWithCustomView:titleLabel];
+    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+
+
+    UIBarButtonItem *fixedSpaceBetweenButtons = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    fixedSpaceBetweenButtons.width = 30; // Define el ancho del espacio en puntos
+
 
     // Filter out Navigation Buttons if user requests so
     if (_browserOptions.hidenavigationbuttons) {
@@ -849,9 +897,9 @@ BOOL isExiting = FALSE;
             [self.toolbar setItems:@[self.closeButton, flexibleSpaceButton]];
         }
     } else if (_browserOptions.lefttoright) {
-        [self.toolbar setItems:@[self.backButton, fixedSpaceButton, self.forwardButton, flexibleSpaceButton, self.closeButton]];
+        [self.toolbar setItems:@[titleItem, flexibleSpace, self.backButton, self.forwardButton, self.closeButton]];
     } else {
-        [self.toolbar setItems:@[self.closeButton, flexibleSpaceButton, self.backButton, fixedSpaceButton, self.forwardButton]];
+        [self.toolbar setItems:@[titleItem, flexibleSpace, self.closeButton ,self.backButton, self.forwardButton]];
     }
     
     self.view.backgroundColor = [UIColor clearColor];
@@ -872,14 +920,33 @@ BOOL isExiting = FALSE;
 
 - (void)setCloseButtonTitle:(NSString*)title : (NSString*) colorString : (int) buttonIndex
 {
-    // the advantage of using UIBarButtonSystemItemDone is the system will localize it for you automatically
-    // but, if you want to set this yourself, knock yourself out (we can't set the title for a system Done button, so we have to create a new one)
-    self.closeButton = nil;
-    // Initialize with title if title is set, otherwise the title will be 'Done' localized
-    self.closeButton = title != nil ? [[UIBarButtonItem alloc] initWithTitle:title style:UIBarButtonItemStylePlain target:self action:@selector(close)] : [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(close)];
-    self.closeButton.enabled = YES;
-    // If color on closebutton is requested then initialize with that that color, otherwise use initialize with default
-    self.closeButton.tintColor = colorString != nil ? [self colorFromHexString:colorString] : [UIColor colorWithRed:60.0 / 255.0 green:136.0 / 255.0 blue:230.0 / 255.0 alpha:1];
+    // Crear un botón personalizado
+    UIButton *customButton = [UIButton buttonWithType:UIButtonTypeCustom];
+
+    // Configurar el título del botón
+    if (title != nil) {
+        [customButton setTitle:title forState:UIControlStateNormal];
+    } else {
+        [customButton setTitle:NSLocalizedString(@"Done", nil) forState:UIControlStateNormal];
+    }
+
+    // Cambiar el tamaño del texto
+    customButton.titleLabel.font = [UIFont systemFontOfSize:24.0]; // Ajusta el tamaño del texto aquí
+
+    // Configurar el color del texto
+    if (colorString != nil) {
+        [customButton setTitleColor:[self colorFromHexString:colorString] forState:UIControlStateNormal];
+    } else {
+        [customButton setTitleColor:[UIColor colorWithRed:60.0 / 255.0 green:136.0 / 255.0 blue:230.0 / 255.0 alpha:1] forState:UIControlStateNormal];
+    }
+
+    // Configurar la acción del botón
+    [customButton addTarget:self action:@selector(close) forControlEvents:UIControlEventTouchUpInside];
+
+
+    // Crear un UIBarButtonItem con el botón personalizado
+    self.closeButton = [[UIBarButtonItem alloc] initWithCustomView:customButton];
+
     
     NSMutableArray* items = [self.toolbar.items mutableCopy];
     [items replaceObjectAtIndex:buttonIndex withObject:self.closeButton];
@@ -1174,7 +1241,7 @@ BOOL isExiting = FALSE;
     [self.spinner stopAnimating];
     
     self.addressLabel.text = NSLocalizedString(@"Load Error", nil);
-    
+
     [self.navigationDelegate webView:theWebView didFailNavigation:error];
     [self updateNavigationButtons];
 }
