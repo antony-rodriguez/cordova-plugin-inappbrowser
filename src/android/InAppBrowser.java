@@ -813,13 +813,25 @@ public class InAppBrowser extends CordovaPlugin {
                 }
                 toolbar.setVerticalGravity(Gravity.TOP);
 
+                TextView title = new TextView(cordova.getActivity());
+                RelativeLayout.LayoutParams titleLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+                titleLayoutParams.addRule(RelativeLayout.ALIGN_LEFT);
+                title.setLayoutParams(titleLayoutParams);
+                title.setTextColor(android.graphics.Color.parseColor(closeButtonColor));
+                title.setId(Integer.valueOf(0));
+                title.setText("Salud");
+                title.setTextSize(20);
+                title.setGravity(Gravity.LEFT);
+                toolbar.addView(title);
+                title.setBackground(null);
+                title.setPadding(this.dpToPixels(10), this.dpToPixels(10), 0, this.dpToPixels(10));
+
                 // Action Button Container layout
                 RelativeLayout actionButtonContainer = new RelativeLayout(cordova.getActivity());
-                RelativeLayout.LayoutParams actionButtonLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                if (leftToRight) actionButtonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                else actionButtonLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+                RelativeLayout.LayoutParams actionButtonLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+                actionButtonLayoutParams.addRule(RelativeLayout.RIGHT_OF, 0);
+                actionButtonLayoutParams.addRule(RelativeLayout.LEFT_OF, 5);
                 actionButtonContainer.setLayoutParams(actionButtonLayoutParams);
-                actionButtonContainer.setHorizontalGravity(Gravity.LEFT);
                 actionButtonContainer.setVerticalGravity(Gravity.CENTER_VERTICAL);
                 actionButtonContainer.setId(leftToRight ? Integer.valueOf(5) : Integer.valueOf(1));
 
@@ -837,7 +849,7 @@ public class InAppBrowser extends CordovaPlugin {
                 back.setBackground(null);
                 back.setImageDrawable(backIcon);
                 back.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                back.setPadding(0, this.dpToPixels(10), 0, this.dpToPixels(10));
+                back.setPadding(this.dpToPixels(10), this.dpToPixels(10), 0, this.dpToPixels(10));
                 back.getAdjustViewBounds();
 
                 back.setOnClickListener(new View.OnClickListener() {
@@ -859,7 +871,7 @@ public class InAppBrowser extends CordovaPlugin {
                 forward.setBackground(null);
                 forward.setImageDrawable(fwdIcon);
                 forward.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                forward.setPadding(0, this.dpToPixels(10), 0, this.dpToPixels(10));
+                forward.setPadding(0, this.dpToPixels(10), this.dpToPixels(10), this.dpToPixels(10));
                 forward.getAdjustViewBounds();
 
                 forward.setOnClickListener(new View.OnClickListener() {
@@ -948,9 +960,9 @@ public class InAppBrowser extends CordovaPlugin {
                 settings.setJavaScriptCanOpenWindowsAutomatically(true);
                 settings.setBuiltInZoomControls(showZoomControls);
                 settings.setPluginState(android.webkit.WebSettings.PluginState.ON);
-                
+
                 // download event
-                
+
                 inAppWebView.setDownloadListener(
                     new DownloadListener(){
                         public void onDownloadStart(
@@ -971,7 +983,7 @@ public class InAppBrowser extends CordovaPlugin {
                             }
                         }
                     }
-                );        
+                );
 
                 // Add postMessage interface
                 class JsObject {
